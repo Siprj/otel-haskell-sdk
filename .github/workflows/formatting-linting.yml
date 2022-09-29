@@ -1,0 +1,38 @@
+name: Formatting and linting
+on:
+  - push
+  - pull_request
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: fourmolu/fourmolu-action@v1
+
+  hlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: haskell/actions/hlint-setup@v2
+      - uses: haskell/actions/hlint-run@v2
+
+  commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install convco
+        run: |
+          mkdir -p /tmp
+          curl -sL https://github.com/convco/convco/releases/latest/download/convco-ubuntu.zip -o "/tmp/convco-ubuntu.zip"
+          mkdir -p "${HOME}/.local/bin/"
+          unzip "/tmp/convco-ubuntu.zip" -d "${HOME}/.local/bin"
+          chmod +x "${HOME}/.local/bin/convco"
+          echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: check the commits
+        run: |
+          ls -lah
+          git log
+          convco check
+
