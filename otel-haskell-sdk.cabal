@@ -62,14 +62,31 @@ library
   import: common-stanza
   import: common-ghc-options
 
-  hs-source-dirs: 
-    src
+  hs-source-dirs:
+    src,
+    generated
 
-  exposed-modules: 
+  exposed-modules:
     Lib
+    Proto.Opentelemetry.Proto.Logs.V1.Logs
+    Proto.Opentelemetry.Proto.Logs.V1.Logs_Fields
+    Proto.Opentelemetry.Proto.Metrics.V1.Metrics
+    Proto.Opentelemetry.Proto.Metrics.V1.Metrics_Fields
+    Proto.Opentelemetry.Proto.Trace.V1.Trace
+    Proto.Opentelemetry.Proto.Trace.V1.Trace_Fields
+    Proto.Opentelemetry.Proto.Resource.V1.Resource
+    Proto.Opentelemetry.Proto.Resource.V1.Resource_Fields
+    Proto.Opentelemetry.Proto.Common.V1.Common
+    Proto.Opentelemetry.Proto.Common.V1.Common_Fields
 
-  build-depends: 
+  build-depends:
       base
+    , deepseq
+    , http-client
+    , microlens
+    , proto-lens
+    , proto-lens-runtime
+    , text
 
 test-suite otel-haskell-sdk-test
   import: common-stanza
