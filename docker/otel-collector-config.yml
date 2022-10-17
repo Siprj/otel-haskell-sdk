@@ -1,0 +1,31 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: "0.0.0.0:4218"
+
+exporters:
+  logging:
+
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    format: body
+    labels:
+      attributes:
+        container_name: ""
+        source: ""
+
+extensions:
+  health_check:
+    check_collector_pipeline:
+      enabled: false
+      interval: "5m"
+      exporter_failure_threshold: 5
+
+service:
+  extensions: [health_check]
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: []
+      exporters: [loki, logging]

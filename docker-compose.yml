@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  opentelemetry-collector:
+    image:  otel/opentelemetry-collector-contrib:0.54.0
+    volumes:
+      - ./docker/otel-collector-config.yml:/etc/otel-collector-config.yml
+    command: [ "--config=/etc/otel-collector-config.yml" ]
+    depends_on:
+      - loki
+    ports:
+      - "127.0.0.1:4218:4218"
+
+  loki:
+    image: grafana/loki:2.4.1
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - ./docker/loki.yaml:/etc/loki/local-config.yaml
+    user: "1000:1000"
+
+  grafana:
+    image: grafana/grafana:9.0.2
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./docker/grafana-provisioning/:/etc/grafana/provisioning
+    depends_on:
+      - loki
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin

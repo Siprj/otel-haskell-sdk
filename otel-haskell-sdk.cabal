@@ -83,7 +83,6 @@ library
     Proto.Opentelemetry.Proto.Collector.Trace.V1.TraceService
     Proto.Opentelemetry.Proto.Collector.Trace.V1.TraceService_Fields
 
-
   build-depends:
       base
     , deepseq
