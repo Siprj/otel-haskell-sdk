@@ -1,33 +1,34 @@
-cabal-version: 3.6
-name: otel-haskell-sdk
-version: 0.1.0
+cabal-version:   3.6
+name:            otel-haskell-sdk
+version:         0.1.0
+
 -- synopsis:
 -- description:
 category:
-homepage: https://github.com/Siprj/otel-haskell-sdk#readme
-bug-reports: https://github.com/Siprj/otel-haskell-sdk/issues
-author: Jan Šipr
-maintainer: sipr.jan@gmail.com
-copyright: Copyright: (c) 2022 Jan Šipr
-license: MIT
-license-file: LICENSE
-build-type: Simple
-tested-with: GHC==9.2.2 || ==9.2.1 || ==9.4.2
+homepage:        https://github.com/Siprj/otel-haskell-sdk#readme
+bug-reports:     https://github.com/Siprj/otel-haskell-sdk/issues
+author:          Jan Šipr
+maintainer:      sipr.jan@gmail.com
+copyright:       Copyright: (c) 2022 Jan Šipr
+license:         MIT
+license-file:    LICENSE
+build-type:      Simple
+tested-with:     GHC ==9.2.1 || ==9.2.2 || ==9.4.2
 extra-doc-files:
-  README.md
   CHANGELOG.md
+  README.md
 
 source-repository head
-  type: git
+  type:     git
   location: https://github.com/Siprj/otel-haskell-sdk
 
 flag pedantic
   description: Pass additional warning flags and -Werror to GHC.
-  manual: True
-  default: True
+  manual:      True
+  default:     True
 
 common common-stanza
-  default-language: GHC2021
+  default-language:   GHC2021
   default-extensions:
     DataKinds
     DerivingStrategies
@@ -36,93 +37,93 @@ common common-stanza
     OverloadedLabels
     OverloadedStrings
     RecordWildCards
+    StrictData
+    TypeFamilies
 
 common common-ghc-options
   if flag(pedantic)
     ghc-options: -Werror
 
   ghc-options:
-    -Wall
-    -Wcompat
-    -Wincomplete-record-updates
-    -Wincomplete-uni-patterns
-    -Wmissing-deriving-strategies
-    -Wmissing-export-lists
-    -Wpartial-fields
-    -Wredundant-constraints
+    -O2 -Wall -Wcompat -Wincomplete-record-updates
+    -Wincomplete-uni-patterns -Wmissing-deriving-strategies
+    -Wmissing-export-lists -Wpartial-fields -Wredundant-constraints
 
 common common-ghc-executable-options
-  ghc-options:
-    -threaded
-    -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
 
 library
-  import: common-stanza
-  import: common-ghc-options
-
-  hs-source-dirs:
-    src,
-    generated
-
+  import:          common-stanza
+  import:          common-ghc-options
+  hs-source-dirs:  src generated
   exposed-modules:
     Lib
+    Otel.Client
+    Otel.Effect
+    Otel.Effect.Static
+    Otel.Internal.Client
+    Otel.Internal.OtelQueue
+    Otel.Internal.Type
+    Otel.Type
+    Proto.Opentelemetry.Proto.Collector.Logs.V1.LogsService
+    Proto.Opentelemetry.Proto.Collector.Logs.V1.LogsService_Fields
+    Proto.Opentelemetry.Proto.Collector.Metrics.V1.MetricsService
+    Proto.Opentelemetry.Proto.Collector.Metrics.V1.MetricsService_Fields
+    Proto.Opentelemetry.Proto.Collector.Trace.V1.TraceService
+    Proto.Opentelemetry.Proto.Collector.Trace.V1.TraceService_Fields
+    Proto.Opentelemetry.Proto.Common.V1.Common
+    Proto.Opentelemetry.Proto.Common.V1.Common_Fields
     Proto.Opentelemetry.Proto.Logs.V1.Logs
     Proto.Opentelemetry.Proto.Logs.V1.Logs_Fields
     Proto.Opentelemetry.Proto.Metrics.V1.Metrics
     Proto.Opentelemetry.Proto.Metrics.V1.Metrics_Fields
-    Proto.Opentelemetry.Proto.Trace.V1.Trace
-    Proto.Opentelemetry.Proto.Trace.V1.Trace_Fields
     Proto.Opentelemetry.Proto.Resource.V1.Resource
     Proto.Opentelemetry.Proto.Resource.V1.Resource_Fields
-    Proto.Opentelemetry.Proto.Common.V1.Common
-    Proto.Opentelemetry.Proto.Common.V1.Common_Fields
+    Proto.Opentelemetry.Proto.Trace.V1.Trace
+    Proto.Opentelemetry.Proto.Trace.V1.Trace_Fields
 
   build-depends:
-      base
+    , aeson
+    , aeson-casing
+    , base
+    , base16-bytestring
+    , bytestring
+    , containers
     , deepseq
+    , exceptions
+    , effectful-core
     , http-client
+    , http-types
     , microlens
+    , optparse-applicative
     , proto-lens
     , proto-lens-runtime
+    , random
+    , stm
     , text
+    , time
+    , vector
 
 test-suite otel-haskell-sdk-test
-  import: common-stanza
-  import: common-ghc-options
-  import: common-ghc-executable-options
-
-  type: exitcode-stdio-1.0
+  import:         common-stanza
+  import:         common-ghc-options
+  import:         common-ghc-executable-options
+  type:           exitcode-stdio-1.0
   hs-source-dirs: test
-  main-is: Tests.hs
-
+  main-is:        Tests.hs
   build-depends:
-      base
+    , base
     , otel-haskell-sdk
     , tasty
     , tasty-hunit
 
-benchmark otel-haskell-sdk-bench
-  import: common-stanza
-  import: common-ghc-options
-  import: common-ghc-executable-options
-
-  type: exitcode-stdio-1.0
-  hs-source-dirs: bench
-  main-is: Bench.hs
-
-  build-depends:
-      base
-    , otel-haskell-sdk
-    , criterion
-
 executable otel-haskell-sdk
-  import: common-stanza
-  import: common-ghc-options
-  import: common-ghc-executable-options
-
+  import:         common-stanza
+  import:         common-ghc-options
+  import:         common-ghc-executable-options
   hs-source-dirs: app
-  main-is: Main.hs
-
+  main-is:        Main.hs
   build-depends:
-      base
+    , base
+    , optparse-applicative
     , otel-haskell-sdk

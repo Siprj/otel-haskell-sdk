@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  opentelemetry-collector:
+    image:  otel/opentelemetry-collector-contrib:0.68.0
+    volumes:
+      - ./docker/otel-collector-config.yml:/etc/otel-collector-config.yml
+    command: [ "--config=/etc/otel-collector-config.yml" ]
+    depends_on:
+      - loki
+      - tempo
+      - prometheus
+    ports:
+      - "127.0.0.1:4218:4218"
+
+  loki:
+    image: grafana/loki:2.7.3
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - ./docker/loki.yaml:/etc/loki/local-config.yaml
+    command: [ "-config.file=/etc/loki/local-config.yaml" ]
+    user: "1000:1000"
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./docker/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "127.0.0.1:4317:4317"  # otlp grpc
+      - "127.0.0.1:3200:3200"
+
+  prometheus:
+    image: prom/prometheus:latest
+    command: [ "--config.file=/etc/prometheus.yaml", "--web.enable-remote-write-receiver" ]
+    volumes:
+      - ./docker/prometheus.yaml:/etc/prometheus.yaml
+    ports:
+      - "127.0.0.1:9090:9090"
+
+
+  grafana:
+    image: grafana/grafana:9.3.6
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./docker/grafana-provisioning/:/etc/grafana/provisioning
+    depends_on:
+      - loki
+      - tempo
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin

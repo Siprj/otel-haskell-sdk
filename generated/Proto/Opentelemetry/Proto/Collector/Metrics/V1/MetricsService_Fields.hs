@@ -1,11 +1,11 @@
 {-# OPTIONS_GHC -Wno-dodgy-exports #-}
 {-# OPTIONS_GHC -Wno-duplicate-exports #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
-{- This file was auto-generated from opentelemetry/proto/resource/v1/resource.proto by the proto-lens-protoc program. -}
+{- This file was auto-generated from opentelemetry/proto/collector/metrics/v1/metrics_service.proto by the proto-lens-protoc program. -}
 {- and then slightly modified -}
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 
-module Proto.Opentelemetry.Proto.Resource.V1.Resource_Fields where
+module Proto.Opentelemetry.Proto.Collector.Metrics.V1.MetricsService_Fields where
 
 import Data.ProtoLens.Runtime.Data.ByteString qualified as Data.ByteString
 import Data.ProtoLens.Runtime.Data.ByteString.Char8 qualified as Data.ByteString.Char8
@@ -30,29 +30,55 @@ import Data.ProtoLens.Runtime.Lens.Family2 qualified as Lens.Family2
 import Data.ProtoLens.Runtime.Lens.Family2.Unchecked qualified as Lens.Family2.Unchecked
 import Data.ProtoLens.Runtime.Prelude qualified as Prelude
 import Data.ProtoLens.Runtime.Text.Read qualified as Text.Read
-import Proto.Opentelemetry.Proto.Common.V1.Common qualified
+import Proto.Opentelemetry.Proto.Metrics.V1.Metrics qualified
 
-attributes ::
+errorMessage ::
   forall f s a.
   ( Prelude.Functor f
-  , Data.ProtoLens.Field.HasField s "attributes" a
+  , Data.ProtoLens.Field.HasField s "errorMessage" a
   ) =>
   Lens.Family2.LensLike' f s a
-attributes = Data.ProtoLens.Field.field @"attributes"
+errorMessage = Data.ProtoLens.Field.field @"errorMessage"
 
-droppedAttributesCount ::
+maybe'partialSuccess ::
   forall f s a.
   ( Prelude.Functor f
-  , Data.ProtoLens.Field.HasField s "droppedAttributesCount" a
+  , Data.ProtoLens.Field.HasField s "maybe'partialSuccess" a
   ) =>
   Lens.Family2.LensLike' f s a
-droppedAttributesCount =
-  Data.ProtoLens.Field.field @"droppedAttributesCount"
+maybe'partialSuccess =
+  Data.ProtoLens.Field.field @"maybe'partialSuccess"
 
-vec'attributes ::
+partialSuccess ::
   forall f s a.
   ( Prelude.Functor f
-  , Data.ProtoLens.Field.HasField s "vec'attributes" a
+  , Data.ProtoLens.Field.HasField s "partialSuccess" a
   ) =>
   Lens.Family2.LensLike' f s a
-vec'attributes = Data.ProtoLens.Field.field @"vec'attributes"
+partialSuccess = Data.ProtoLens.Field.field @"partialSuccess"
+
+rejectedDataPoints ::
+  forall f s a.
+  ( Prelude.Functor f
+  , Data.ProtoLens.Field.HasField s "rejectedDataPoints" a
+  ) =>
+  Lens.Family2.LensLike' f s a
+rejectedDataPoints =
+  Data.ProtoLens.Field.field @"rejectedDataPoints"
+
+resourceMetrics ::
+  forall f s a.
+  ( Prelude.Functor f
+  , Data.ProtoLens.Field.HasField s "resourceMetrics" a
+  ) =>
+  Lens.Family2.LensLike' f s a
+resourceMetrics = Data.ProtoLens.Field.field @"resourceMetrics"
+
+vec'resourceMetrics ::
+  forall f s a.
+  ( Prelude.Functor f
+  , Data.ProtoLens.Field.HasField s "vec'resourceMetrics" a
+  ) =>
+  Lens.Family2.LensLike' f s a
+vec'resourceMetrics =
+  Data.ProtoLens.Field.field @"vec'resourceMetrics"
