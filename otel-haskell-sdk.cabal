@@ -13,7 +13,7 @@ license: MIT
 license-file: LICENSE
 build-type: Simple
 tested-with: GHC==9.2.2 || ==9.2.1 || ==9.4.2
-extra-doc-files: 
+extra-doc-files:
   README.md
   CHANGELOG.md
 
@@ -43,15 +43,13 @@ common common-ghc-options
 
   ghc-options:
     -Wall
-    -Wcompat 
+    -Wcompat
     -Wincomplete-record-updates
     -Wincomplete-uni-patterns
     -Wmissing-deriving-strategies
     -Wmissing-export-lists
     -Wpartial-fields
     -Wredundant-constraints
-    -threaded
-    -rtsopts -with-rtsopts=-N
 
 common common-ghc-executable-options
   ghc-options:
@@ -112,7 +110,7 @@ benchmark otel-haskell-sdk-bench
   hs-source-dirs: bench
   main-is: Bench.hs
 
-  build-depends: 
+  build-depends:
       base
     , otel-haskell-sdk
     , criterion
@@ -125,6 +123,6 @@ executable otel-haskell-sdk
   hs-source-dirs: app
   main-is: Main.hs
 
-  build-depends: 
+  build-depends:
       base
     , otel-haskell-sdk
