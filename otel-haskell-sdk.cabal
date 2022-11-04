@@ -91,6 +91,9 @@ library
     , proto-lens
     , proto-lens-runtime
     , text
+    , effectful-core
+    , containers
+    , vector
 
 test-suite otel-haskell-sdk-test
   import: common-stanza
