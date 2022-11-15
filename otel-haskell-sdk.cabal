@@ -36,6 +36,7 @@ common common-stanza
     OverloadedLabels
     OverloadedStrings
     RecordWildCards
+    StrictData
 
 common common-ghc-options
   if flag(pedantic)
@@ -66,6 +67,8 @@ library
 
   exposed-modules:
     Lib
+    Otel.Effect
+    Otel.Type
     Proto.Opentelemetry.Proto.Logs.V1.Logs
     Proto.Opentelemetry.Proto.Logs.V1.Logs_Fields
     Proto.Opentelemetry.Proto.Metrics.V1.Metrics

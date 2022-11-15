@@ -12,31 +12,6 @@ import Lens.Micro
 import Data.Text
 import Proto.Opentelemetry.Proto.Common.V1.Common
 import Proto.Opentelemetry.Proto.Logs.V1.Logs
-import Proto.Opentelemetry.Proto.Metrics.V1.Metrics
-import Proto.Opentelemetry.Proto.Trace.V1.Trace
-import Effectful
-import Data.Vector
-import GHC.Stack (HasCallStack)
-import Effectful.Dispatch.Dynamic
-
-type instance DispatchOf Otel = Dynamic
-data Otel :: Effect where
-  WithScope :: InstrumentationScope -> m a -> Otel m a
-  Log :: LogRecord -> Otel m ()
-  Trace :: Span -> Otel m ()
-  Metrics :: (Vector Metric) -> Otel m ()
-
-withInstrumentation :: (HasCallStack, Otel :> es ) => InstrumentationScope -> Eff es a -> Eff es a
-withInstrumentation scope' m = send $ WithScope scope' m
-
-log :: (HasCallStack, Otel :> es ) => LogRecord -> Eff es ()
-log logRecord' = send $ Log logRecord'
-
-trace :: (HasCallStack, Otel :> es ) => Span -> Eff es ()
-trace span' = send $ Trace span'
-
-metrics :: (HasCallStack, Otel :> es ) => Vector Metric -> Eff es ()
-metrics metric' = send $ Metrics metric'
 
 greet :: IO ()
 greet = do
