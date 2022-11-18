@@ -88,14 +88,16 @@ library
 
   build-depends:
       base
+    , bytestring
+    , containers
     , deepseq
+    , effectful-core
     , http-client
     , microlens
     , proto-lens
     , proto-lens-runtime
     , text
-    , effectful-core
-    , containers
+    , time
     , vector
 
 test-suite otel-haskell-sdk-test
