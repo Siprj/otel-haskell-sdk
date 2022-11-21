@@ -18,16 +18,20 @@ module Otel.Effect
   , logWarn_
   , logError_
   , logFatal_
+  , spanFromContextAndLinks
+  , spanAndLinks
+  , span
+  , span_
   )
 where
 
-import Prelude hiding (log)
+import Prelude hiding (log, span)
 
 import Effectful
 import Proto.Opentelemetry.Proto.Common.V1.Common
 import Proto.Opentelemetry.Proto.Logs.V1.Logs
 import Proto.Opentelemetry.Proto.Trace.V1.Trace
-import Data.Vector
+import Data.Vector hiding (span)
 import Proto.Opentelemetry.Proto.Metrics.V1.Metrics
 import GHC.Stack
 import Data.ProtoLens.Labels ()
@@ -45,6 +49,8 @@ nanosSinceEpoch = floor . (1e9 *) . nominalDiffTimeToSeconds . utcTimeToPOSIXSec
 
 type instance DispatchOf Otel = 'Dynamic
 
+
+-- Root span should be created by the run effect function...
 data Otel :: Effect where
   WithInstrumentationScopeCall :: InstrumentationScope -> m a -> Otel m a
   LogCall :: LogRecord -> Otel m ()
@@ -129,3 +135,42 @@ logError_ message = logError emptyAttributes message
 
 logFatal_ :: (HasCallStack, Otel :> es , IOE :> es) => Message -> Eff es ()
 logFatal_ message = logFatal emptyAttributes message
+
+
+-- Tracing --------------------------------------------------------------------
+
+-- TODO: There was something about callstack that can be part of
+-- traces??? Maybe in case of error status???
+spanFromContextAndLinks
+  :: (HasCallStack, Otel :> es , IOE :> es)
+  => SpanContext
+  -> SpanLinks
+  -> SpanKind
+  -> Attributes
+  -> SpanName
+  -> Eff es ()
+spanFromContextAndLinks = undefined
+
+spanAndLinks
+  :: (HasCallStack, Otel :> es , IOE :> es)
+  => SpanLinks
+  -> Attributes
+  -> SpanKind
+  -> SpanName
+  -> Eff es ()
+spanAndLinks = undefined
+
+span
+  :: (HasCallStack, Otel :> es , IOE :> es)
+  => Attributes
+  -> SpanKind
+  -> SpanName
+  -> Eff es ()
+span = spanAndLinks emptyLinks
+
+span_
+  :: (HasCallStack, Otel :> es , IOE :> es)
+  => SpanKind
+  -> SpanName
+  -> Eff es ()
+span_ = span emptyAttributes

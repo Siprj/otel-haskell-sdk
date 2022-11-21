@@ -11,15 +11,22 @@ module Otel.Type
   , logLevelToSeverityNumber
   , TraceId
   , SpanId
+  , SpanName
+  , SpanContext(..)
+  , Sampled(..)
+  , SpanLink(..)
+  , SpanLinks
+  , emptyLinks
+  , SpanKind(..)
   )
 where
 
 import Data.Vector
-import Data.Text
+import Data.Text hiding (empty)
 import Proto.Opentelemetry.Proto.Common.V1.Common
 import Proto.Opentelemetry.Proto.Logs.V1.Logs
 import GHC.Generics
-import Data.ByteString hiding (pack)
+import Data.ByteString hiding (pack, empty)
 
 data LogLevel
   = Trace
@@ -69,5 +76,36 @@ data Scope = Scope
   deriving stock (Show, Generic)
 
 emptyAttributes :: Attributes
-emptyAttributes = undefined
+emptyAttributes = empty
 
+type SpanName = Text
+
+data Sampled = Sampled | Unsampled
+
+-- Context is used for propagating the trace across services
+data SpanContext = SpanContext
+  { traceId :: TraceId
+  , parentSpanId :: SpanId
+  , sampled :: Sampled
+  , attributes :: Attributes
+  }
+
+-- FIXME: There should be a way to get link from currently running span.
+data SpanLink = SpanLink
+  { traceId :: TraceId
+  , spanId :: SpanId
+  , attributes :: Attributes
+  }
+
+type SpanLinks = Vector SpanLink
+
+emptyLinks :: SpanLinks
+emptyLinks = empty
+
+data SpanKind
+  = Unspecified
+  | Internal
+  | Server
+  | Client
+  | Producer
+  | Consumer
