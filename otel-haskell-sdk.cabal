@@ -99,6 +99,7 @@ library
     , text
     , time
     , vector
+    , random
 
 test-suite otel-haskell-sdk-test
   import: common-stanza

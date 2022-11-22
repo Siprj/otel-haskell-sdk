@@ -6,6 +6,9 @@ module Otel.Effect
   , trace
   , metrics
   , getCurrentTraceId
+  , getCurrentSpanId
+  , setCurrentTraceId
+  , setCurrentSpanId
   , logTrace
   , logDebug
   , logInfo
@@ -38,8 +41,7 @@ import Data.ProtoLens.Labels ()
 import Effectful.Dispatch.Dynamic
 import Otel.Type
 import Lens.Micro
-import Data.ProtoLens (defMessage, fieldDefault)
-import Data.Maybe
+import Data.ProtoLens (defMessage)
 import Data.Time.Clock.POSIX
 import Data.Time.Clock
 import Data.Word
@@ -56,8 +58,10 @@ data Otel :: Effect where
   LogCall :: LogRecord -> Otel m ()
   TraceCall :: Span -> Otel m ()
   MetricsCall :: (Vector Metric) -> Otel m ()
-  GetCurrentTraceIdCall :: Otel m (Maybe TraceId)
-  GetCurrentSpanIdCall :: Otel m (Maybe SpanId)
+  GetCurrentTraceIdCall :: Otel m TraceId
+  GetCurrentSpanIdCall :: Otel m SpanId
+  SetCurrentTraceIdCall :: TraceId -> Otel m ()
+  SetCurrentSpanIdCall :: SpanId -> Otel m ()
 
 withInstrumentation :: (HasCallStack, Otel :> es ) => InstrumentationScope -> Eff es a -> Eff es a
 withInstrumentation scope' m = send $ WithInstrumentationScopeCall scope' m
@@ -71,29 +75,35 @@ trace span' = send $ TraceCall span'
 metrics :: (HasCallStack, Otel :> es ) => Vector Metric -> Eff es ()
 metrics metric' = send $ MetricsCall metric'
 
-getCurrentTraceId :: (HasCallStack, Otel :> es ) => Eff es (Maybe TraceId)
+getCurrentTraceId :: (HasCallStack, Otel :> es ) => Eff es TraceId
 getCurrentTraceId = send GetCurrentTraceIdCall
 
-getCurrentSpanId :: (HasCallStack, Otel :> es ) => Eff es (Maybe SpanId)
+getCurrentSpanId :: (HasCallStack, Otel :> es ) => Eff es SpanId
 getCurrentSpanId = send GetCurrentSpanIdCall
+
+setCurrentTraceId :: (HasCallStack, Otel :> es ) => TraceId -> Eff es ()
+setCurrentTraceId = send . SetCurrentTraceIdCall
+
+setCurrentSpanId :: (HasCallStack, Otel :> es ) => SpanId -> Eff es ()
+setCurrentSpanId = send . SetCurrentSpanIdCall
 
 log' :: (HasCallStack, Otel :> es, IOE :> es) => LogLevel -> Attributes -> Message -> Eff es ()
 log' logLevel attributes message = do
-  mTraceId <- getCurrentTraceId
-  mSpanId <- getCurrentSpanId
+  traceId <- getCurrentTraceId
+  spanId <- getCurrentSpanId
   -- FIXME: Maybe time effect should be used instead of IO call???
   time <- liftIO getCurrentTime
-  log $ mkLogRecord mTraceId mSpanId time
+  log $ mkLogRecord traceId spanId time
   where
-    mkLogRecord :: Maybe TraceId -> Maybe SpanId -> UTCTime -> LogRecord
-    mkLogRecord mTraceId mSpanId time = defMessage
+    mkLogRecord :: TraceId -> SpanId -> UTCTime -> LogRecord
+    mkLogRecord traceId spanId time = defMessage
       & #severityText .~ logLevelToSeverityText logLevel
       & #severityNumber .~ logLevelToSeverityNumber logLevel
       & #body .~ messageBody
       & #vec'attributes .~ attributes
       -- FIXME: What is the difference between traceId and spanId
-      & #traceId .~ (fromMaybe fieldDefault mTraceId)
-      & #spanId .~ (fromMaybe fieldDefault mSpanId)
+      & #traceId .~ fromTraceId traceId
+      & #spanId .~ fromSpanId spanId
       & #timeUnixNano .~ nanosSinceEpoch time
 
     messageBody :: AnyValue
@@ -119,22 +129,22 @@ logFatal :: (HasCallStack, Otel :> es, IOE :> es) => Attributes -> Message -> Ef
 logFatal = log' Fatal
 
 logTrace_ :: (HasCallStack, Otel :> es, IOE :> es) => Message -> Eff es ()
-logTrace_ message = logTrace emptyAttributes message
+logTrace_ = logTrace emptyAttributes
 
 logDebug_ :: (HasCallStack, Otel :> es, IOE :> es) => Message -> Eff es ()
-logDebug_ message = logDebug emptyAttributes message
+logDebug_ = logDebug emptyAttributes
 
 logInfo_ :: (HasCallStack, Otel :> es, IOE :> es) => Message -> Eff es ()
-logInfo_ message = logInfo emptyAttributes message
+logInfo_ = logInfo emptyAttributes
 
 logWarn_ :: (HasCallStack, Otel :> es, IOE :> es) => Message -> Eff es ()
-logWarn_ message = logWarn emptyAttributes message
+logWarn_ = logWarn emptyAttributes
 
 logError_ :: (HasCallStack, Otel :> es, IOE :> es) => Message -> Eff es ()
-logError_ message = logError emptyAttributes message
+logError_ = logError emptyAttributes
 
-logFatal_ :: (HasCallStack, Otel :> es , IOE :> es) => Message -> Eff es ()
-logFatal_ message = logFatal emptyAttributes message
+logFatal_ :: (HasCallStack, Otel :> es, IOE :> es) => Message -> Eff es ()
+logFatal_ = logFatal emptyAttributes
 
 
 -- Tracing --------------------------------------------------------------------
@@ -142,7 +152,7 @@ logFatal_ message = logFatal emptyAttributes message
 -- TODO: There was something about callstack that can be part of
 -- traces??? Maybe in case of error status???
 spanFromContextAndLinks
-  :: (HasCallStack, Otel :> es , IOE :> es)
+  :: (HasCallStack, Otel :> es, IOE :> es)
   => SpanContext
   -> SpanLinks
   -> SpanKind
@@ -151,17 +161,45 @@ spanFromContextAndLinks
   -> Eff es ()
 spanFromContextAndLinks = undefined
 
+-- TODO: We are ignoring TraceState which should be part of Context
+-- FIXME: I forgot about the actions that are supposed to measured by the trace.
 spanAndLinks
-  :: (HasCallStack, Otel :> es , IOE :> es)
+  :: (HasCallStack, Otel :> es, IOE :> es)
   => SpanLinks
   -> Attributes
   -> SpanKind
   -> SpanName
   -> Eff es ()
-spanAndLinks = undefined
+spanAndLinks spanLinks attributes kind name = do
+  time <- liftIO getCurrentTime
+  traceId <- getCurrentTraceId
+  oldSpanId <- getCurrentSpanId
+  newSpanId <- liftIO getRandomSpanId
+  trace $ mkSpan time oldSpanId traceId newSpanId
+  where
+    mkSpan :: UTCTime -> SpanId -> TraceId -> SpanId -> Span
+    mkSpan time oldSpanId traceId newSpanId = defMessage
+      & #traceId .~ fromTraceId traceId
+      & #spanId .~ fromSpanId newSpanId
+      & #parentSpanId .~ fromSpanId oldSpanId
+      & #name .~ name
+      & #kind .~ toOtelSpanKind kind
+      & #startTimeUnixNano .~ nanosSinceEpoch time
+      -- FIXME: end time needs to be implemented for the trace to work correctly
+      -- & endTimeUnixNano
+      & #vec'attributes .~ attributes
+      -- FIXME: Not sure how to implement the events yet. Need to somehow share
+      -- the correct span in the make event call :thinkface:. Maybe some kind
+      -- of stack would do the trick???
+      -- & #vec'events .~ something
+      & #vec'links .~ toOtelSpanLinks spanLinks
+      -- FIXME: Think about adding correct span status here. Not sure what the
+      -- error is for though.
+      & #status .~ toOtelSpanStatus SpanOk
+
 
 span
-  :: (HasCallStack, Otel :> es , IOE :> es)
+  :: (HasCallStack, Otel :> es, IOE :> es)
   => Attributes
   -> SpanKind
   -> SpanName
@@ -169,7 +207,7 @@ span
 span = spanAndLinks emptyLinks
 
 span_
-  :: (HasCallStack, Otel :> es , IOE :> es)
+  :: (HasCallStack, Otel :> es, IOE :> es)
   => SpanKind
   -> SpanName
   -> Eff es ()

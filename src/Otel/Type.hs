@@ -10,14 +10,23 @@ module Otel.Type
   , logLevelToSeverityText
   , logLevelToSeverityNumber
   , TraceId
+  , getRandomTraceId
+  , fromTraceId
   , SpanId
+  , getRandomSpanId
+  , fromSpanId
   , SpanName
   , SpanContext(..)
   , Sampled(..)
   , SpanLink(..)
+  , toOtelSpanLink
   , SpanLinks
+  , toOtelSpanLinks
   , emptyLinks
   , SpanKind(..)
+  , toOtelSpanKind
+  , SpanStatus(..)
+  , toOtelSpanStatus
   )
 where
 
@@ -27,6 +36,13 @@ import Proto.Opentelemetry.Proto.Common.V1.Common
 import Proto.Opentelemetry.Proto.Logs.V1.Logs
 import GHC.Generics
 import Data.ByteString hiding (pack, empty)
+import GHC.Num (Natural)
+import System.Random
+import System.Random.Stateful
+import Proto.Opentelemetry.Proto.Trace.V1.Trace (Span'SpanKind (..), Span'Link, Status, Status'StatusCode (..))
+import Data.ProtoLens (defMessage)
+import Lens.Micro ((&), (.~))
+import Data.ProtoLens.Labels ()
 
 data LogLevel
   = Trace
@@ -64,8 +80,23 @@ type Message = Text
 type ResourceAttributes = Attributes
 
 type ScopeAttributes = Attributes
-type TraceId = ByteString
-type SpanId = ByteString
+newtype TraceId = TraceId ByteString
+newtype SpanId = SpanId ByteString
+
+getRandomTraceId :: IO TraceId
+getRandomTraceId = TraceId <$> getRandomID 16
+
+fromTraceId :: TraceId -> ByteString
+fromTraceId (TraceId traceId) = traceId
+
+getRandomSpanId :: IO SpanId
+getRandomSpanId = SpanId <$> getRandomID 16
+
+fromSpanId :: SpanId -> ByteString
+fromSpanId (SpanId spanId) = spanId
+
+getRandomID :: Natural -> IO ByteString
+getRandomID size = applyAtomicGen (genByteString $ fromIntegral size) globalStdGen
 
 -- Describes the scope. Can be a component or instrumented library.
 data Scope = Scope
@@ -97,7 +128,17 @@ data SpanLink = SpanLink
   , attributes :: Attributes
   }
 
+toOtelSpanLink :: SpanLink -> Span'Link
+toOtelSpanLink SpanLink{..} = defMessage
+  & #traceId .~ fromTraceId traceId
+  & #spanId .~ fromSpanId spanId
+  -- TODO: Think about addint trace state here...
+  & #vec'attributes .~ attributes
+
 type SpanLinks = Vector SpanLink
+
+toOtelSpanLinks :: SpanLinks -> Vector Span'Link
+toOtelSpanLinks = fmap toOtelSpanLink
 
 emptyLinks :: SpanLinks
 emptyLinks = empty
@@ -109,3 +150,22 @@ data SpanKind
   | Client
   | Producer
   | Consumer
+
+toOtelSpanKind :: SpanKind -> Span'SpanKind
+toOtelSpanKind = \case
+    Unspecified -> Span'SPAN_KIND_UNSPECIFIED
+    Internal -> Span'SPAN_KIND_INTERNAL
+    Server -> Span'SPAN_KIND_SERVER
+    Client -> Span'SPAN_KIND_CLIENT
+    Producer -> Span'SPAN_KIND_PRODUCER
+    Consumer -> Span'SPAN_KIND_CONSUMER
+
+-- Error is human readable error text
+data SpanStatus = SpanOk | SpanError Text
+
+toOtelSpanStatus :: SpanStatus -> Status
+toOtelSpanStatus SpanOk = defMessage
+  & #code .~ Status'STATUS_CODE_OK
+toOtelSpanStatus (SpanError errorMessage) = defMessage
+  & #code .~ Status'STATUS_CODE_ERROR
+  & #message .~ errorMessage
