@@ -1,6 +1,8 @@
 {-# LANGUAGE TypeFamilies #-}
 module Otel.Type
   ( LogLevel(..)
+  , LogData(..)
+  , TraceData(..)
   , Attributes
   , Message
   , ResourceAttributes
@@ -81,7 +83,9 @@ type ResourceAttributes = Attributes
 
 type ScopeAttributes = Attributes
 newtype TraceId = TraceId ByteString
+  deriving stock (Show, Generic)
 newtype SpanId = SpanId ByteString
+  deriving stock (Show, Generic)
 
 getRandomTraceId :: IO TraceId
 getRandomTraceId = TraceId <$> getRandomID 16
@@ -112,6 +116,7 @@ emptyAttributes = empty
 type SpanName = Text
 
 data Sampled = Sampled | Unsampled
+  deriving stock (Show, Generic)
 
 -- Context is used for propagating the trace across services
 data SpanContext = SpanContext
@@ -120,6 +125,7 @@ data SpanContext = SpanContext
   , sampled :: Sampled
   , attributes :: Attributes
   }
+  deriving stock (Show, Generic)
 
 -- FIXME: There should be a way to get link from currently running span.
 data SpanLink = SpanLink
@@ -127,6 +133,7 @@ data SpanLink = SpanLink
   , spanId :: SpanId
   , attributes :: Attributes
   }
+  deriving stock (Show, Generic)
 
 toOtelSpanLink :: SpanLink -> Span'Link
 toOtelSpanLink SpanLink{..} = defMessage
@@ -150,6 +157,7 @@ data SpanKind
   | Client
   | Producer
   | Consumer
+  deriving stock (Show, Generic)
 
 toOtelSpanKind :: SpanKind -> Span'SpanKind
 toOtelSpanKind = \case
@@ -169,3 +177,19 @@ toOtelSpanStatus SpanOk = defMessage
 toOtelSpanStatus (SpanError errorMessage) = defMessage
   & #code .~ Status'STATUS_CODE_ERROR
   & #message .~ errorMessage
+
+
+data LogData = LogData
+  { logLevel :: !LogLevel
+  , message :: !Text
+  , attributes :: !(Vector Proto.Opentelemetry.Proto.Common.V1.Common.KeyValue)
+  }
+  deriving stock (Show, Generic)
+
+data TraceData = TraceData
+  { name :: !Text
+  , kind :: !SpanKind
+  , attributes :: !(Vector Proto.Opentelemetry.Proto.Common.V1.Common.KeyValue)
+  , spanLinks :: !(Vector SpanLink)
+  }
+  deriving stock (Show, Generic)
