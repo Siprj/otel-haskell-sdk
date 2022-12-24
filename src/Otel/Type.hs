@@ -8,6 +8,7 @@ module Otel.Type
   , ResourceAttributes
   , ScopeAttributes
   , Scope(..)
+  , toOtelInstrumentationScope
   , emptyAttributes
   , logLevelToSeverityText
   , logLevelToSeverityNumber
@@ -94,7 +95,7 @@ fromTraceId :: TraceId -> ByteString
 fromTraceId (TraceId traceId) = traceId
 
 getRandomSpanId :: IO SpanId
-getRandomSpanId = SpanId <$> getRandomID 16
+getRandomSpanId = SpanId <$> getRandomID 8
 
 fromSpanId :: SpanId -> ByteString
 fromSpanId (SpanId spanId) = spanId
@@ -109,6 +110,13 @@ data Scope = Scope
   , attributes :: ScopeAttributes
   }
   deriving stock (Show, Generic)
+
+toOtelInstrumentationScope :: Scope -> InstrumentationScope
+toOtelInstrumentationScope Scope{..} = defMessage
+  & #name .~ name
+  & #version .~ version
+  -- TODO: Think about addint trace state here...
+  & #vec'attributes .~ attributes
 
 emptyAttributes :: Attributes
 emptyAttributes = empty
@@ -182,14 +190,20 @@ toOtelSpanStatus (SpanError errorMessage) = defMessage
 data LogData = LogData
   { logLevel :: !LogLevel
   , message :: !Text
-  , attributes :: !(Vector Proto.Opentelemetry.Proto.Common.V1.Common.KeyValue)
+  , attributes :: !Attributes
   }
   deriving stock (Show, Generic)
 
 data TraceData = TraceData
   { name :: !Text
   , kind :: !SpanKind
-  , attributes :: !(Vector Proto.Opentelemetry.Proto.Common.V1.Common.KeyValue)
+  , attributes :: !Attributes
   , spanLinks :: !(Vector SpanLink)
+  }
+  deriving stock (Show, Generic)
+
+data Event = Event
+  { name :: !Text
+  , attributes :: !Attributes
   }
   deriving stock (Show, Generic)

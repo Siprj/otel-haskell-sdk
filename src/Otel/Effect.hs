@@ -3,14 +3,8 @@ module Otel.Effect
   ( Otel(..)
   , withInstrumentation
   , log
-  , log2
   , trace
-  , trace2
   , metrics
-  , getCurrentTraceId
-  , getCurrentSpanId
-  , setCurrentTraceId
-  , setCurrentSpanId
   , logTrace
   , logDebug
   , logInfo
@@ -23,7 +17,6 @@ module Otel.Effect
   , logWarn_
   , logError_
   , logFatal_
-  , spanFromContextAndLinks
   , spanAndLinks
   , span
   , span_
@@ -34,22 +27,12 @@ import Prelude hiding (log, span)
 
 import Effectful
 import Proto.Opentelemetry.Proto.Common.V1.Common
-import Proto.Opentelemetry.Proto.Logs.V1.Logs
-import Proto.Opentelemetry.Proto.Trace.V1.Trace
 import Data.Vector hiding (span)
 import Proto.Opentelemetry.Proto.Metrics.V1.Metrics
 import GHC.Stack
 import Data.ProtoLens.Labels ()
 import Effectful.Dispatch.Dynamic
 import Otel.Type
-import Lens.Micro
-import Data.ProtoLens (defMessage)
-import Data.Time.Clock.POSIX
-import Data.Time.Clock
-import Data.Word
-
-nanosSinceEpoch :: UTCTime -> Word64
-nanosSinceEpoch = floor . (1e9 *) . nominalDiffTimeToSeconds . utcTimeToPOSIXSeconds
 
 type instance DispatchOf Otel = 'Dynamic
 
@@ -57,49 +40,25 @@ type instance DispatchOf Otel = 'Dynamic
 -- Root span should be created by the run effect function...
 data Otel :: Effect where
   WithInstrumentationScopeCall :: InstrumentationScope -> m a -> Otel m a
-  LogCall :: LogRecord -> Otel m ()
-  TraceCall :: Span -> Otel m ()
   MetricsCall :: (Vector Metric) -> Otel m ()
-  GetCurrentTraceIdCall :: Otel m TraceId
-  GetCurrentSpanIdCall :: Otel m SpanId
-  SetCurrentTraceIdCall :: TraceId -> Otel m ()
-  SetCurrentSpanIdCall :: SpanId -> Otel m ()
-  LogCall2 :: LogData -> Otel m ()
-  TraceCall2 :: (Otel :> es) => TraceData -> Eff es a -> Otel m a
+  LogCall :: LogData -> Otel m ()
+  TraceCall :: (Otel :> es) => TraceData -> Eff es a -> Otel m a
 
 
 withInstrumentation :: (HasCallStack, Otel :> es) => InstrumentationScope -> Eff es a -> Eff es a
 withInstrumentation scope' m = send $ WithInstrumentationScopeCall scope' m
 
-log :: (HasCallStack, Otel :> es) => LogRecord -> Eff es ()
-log logRecord' = send $ LogCall logRecord'
+log :: (HasCallStack, Otel :> es) => LogData -> Eff es ()
+log logData = send $ LogCall logData
 
-log2 :: (HasCallStack, Otel :> es) => LogData -> Eff es ()
-log2 logData = send $ LogCall2 logData
-
-trace :: (HasCallStack, Otel :> es) => Span -> Eff es ()
-trace span' = send $ TraceCall span'
-
-trace2 :: (HasCallStack, Otel :> es) => TraceData -> Eff es a -> Eff es a
-trace2 traceData m = send $ TraceCall2 traceData m
+trace :: (HasCallStack, Otel :> es) => TraceData -> Eff es a -> Eff es a
+trace traceData m = send $ TraceCall traceData m
 
 metrics :: (HasCallStack, Otel :> es) => Vector Metric -> Eff es ()
 metrics metric' = send $ MetricsCall metric'
 
-getCurrentTraceId :: (HasCallStack, Otel :> es) => Eff es TraceId
-getCurrentTraceId = send GetCurrentTraceIdCall
-
-getCurrentSpanId :: (HasCallStack, Otel :> es) => Eff es SpanId
-getCurrentSpanId = send GetCurrentSpanIdCall
-
-setCurrentTraceId :: (HasCallStack, Otel :> es) => TraceId -> Eff es ()
-setCurrentTraceId = send . SetCurrentTraceIdCall
-
-setCurrentSpanId :: (HasCallStack, Otel :> es) => SpanId -> Eff es ()
-setCurrentSpanId = send . SetCurrentSpanIdCall
-
 log' :: (HasCallStack, Otel :> es) => LogLevel -> Attributes -> Message -> Eff es ()
-log' logLevel attributes message = log2 LogData{..}
+log' logLevel attributes message = log LogData{..}
 --  traceId <- getCurrentTraceId
 --  spanId <- getCurrentSpanId
 --  -- FIXME: Maybe time effect should be used instead of IO call???
@@ -171,7 +130,7 @@ spanAndLinks
   -> SpanName
   -> Eff es a
   -> Eff es a
-spanAndLinks spanLinks attributes kind name = trace2 TraceData {..}
+spanAndLinks spanLinks attributes kind name = trace TraceData {..}
 --  time <- liftIO getCurrentTime
 --  traceId <- getCurrentTraceId
 --  oldSpanId <- getCurrentSpanId
@@ -218,12 +177,8 @@ span_
   -> Eff es a
 span_ = span emptyAttributes
 
-runOtel
-   :: (IOE :> es)
-   => Eff (Otel : es) a
-   -> Eff es a
-runOtel = interpret $ \_ -> \case
-  ReadFile path           -> adapt $ IO.readFile path
-  WriteFile path contents -> adapt $ IO.writeFile path contents
-  where
-    adapt m = liftIO m `catch` \(e::IOException) -> throwError . FsError $ show e
+--runOtel
+--   :: (IOE :> es)
+--   => Eff (Otel : es) a
+--   -> Eff es a
+--runOtel = undefined

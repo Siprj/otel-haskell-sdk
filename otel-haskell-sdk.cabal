@@ -68,7 +68,9 @@ library
   exposed-modules:
     Lib
     Otel.Effect
+    Otel.Effect.Static
     Otel.Type
+    Otel.Client
     Proto.Opentelemetry.Proto.Logs.V1.Logs
     Proto.Opentelemetry.Proto.Logs.V1.Logs_Fields
     Proto.Opentelemetry.Proto.Metrics.V1.Metrics
@@ -96,10 +98,11 @@ library
     , microlens
     , proto-lens
     , proto-lens-runtime
+    , random
+    , stm
     , text
     , time
     , vector
-    , random
 
 test-suite otel-haskell-sdk-test
   import: common-stanza
