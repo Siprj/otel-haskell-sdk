@@ -6,14 +6,32 @@ receivers:
 
 exporters:
   logging:
+    # verbosity: detailed
 
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
-    format: body
-    labels:
-      attributes:
-        container_name: ""
-        source: ""
+
+processors:
+  attributes:
+    actions:
+      - action: insert
+        key: loki.format
+        value: json
+
+  resource:
+    attributes:
+      - action: insert
+        key: loki.resource.labels
+        value: machine_name,machine_id,container_name
+      - action: insert
+        key: machine_name
+        from_attribute: machine.name
+      - action: insert
+        key: machine_id
+        from_attribute: machine.id
+
+  batch:
+    send_batch_size:  5000
 
 extensions:
   health_check:
@@ -27,5 +45,5 @@ service:
   pipelines:
     logs:
       receivers: [otlp]
-      processors: []
+      processors: [resource, batch]
       exporters: [loki, logging]

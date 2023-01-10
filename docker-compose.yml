@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   opentelemetry-collector:
-    image:  otel/opentelemetry-collector-contrib:0.54.0
+    image:  otel/opentelemetry-collector-contrib:0.68.0
     volumes:
       - ./docker/otel-collector-config.yml:/etc/otel-collector-config.yml
     command: [ "--config=/etc/otel-collector-config.yml" ]
@@ -17,6 +17,7 @@ services:
       - "127.0.0.1:3100:3100"
     volumes:
       - ./docker/loki.yaml:/etc/loki/local-config.yaml
+    command: [ "-config.file=/etc/loki/local-config.yaml" ]
     user: "1000:1000"
 
   grafana:

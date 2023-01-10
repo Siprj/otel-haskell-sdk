@@ -43,6 +43,7 @@ common common-ghc-options
     ghc-options: -Werror
 
   ghc-options:
+    -O2
     -Wall
     -Wcompat
     -Wincomplete-record-updates
