@@ -12,6 +12,7 @@ import Control.Concurrent
 import Control.Concurrent.STM (atomically)
 import Control.Exception (SomeException, catch)
 import Control.Monad (forever, unless, void)
+import Data.ByteString (ByteString)
 import Data.Function ((&))
 import Data.List (foldl')
 import Data.Map.Strict (toList)
@@ -23,7 +24,7 @@ import Network.HTTP.Client
 import Network.HTTP.Types.Status (statusIsSuccessful)
 import Numeric.Natural
 import Otel.Internal.OtelQueue (OtelQueueSet, OtelSingleQueue, flushSingleQueueData, getQueueMap, newOtelQueueSetIO, queueLengthIO)
-import Otel.Internal.Type (ResourceAttributes, toOtelAttributes, toOtelInstrumentationScope, ScopeData)
+import Otel.Internal.Type (ResourceAttributes, ScopeData, toOtelAttributes, toOtelInstrumentationScope)
 import Proto.Opentelemetry.Proto.Collector.Logs.V1.LogsService (ExportLogsServiceRequest)
 import Proto.Opentelemetry.Proto.Collector.Logs.V1.LogsService_Fields (resourceLogs)
 import Proto.Opentelemetry.Proto.Collector.Trace.V1.TraceService (ExportTraceServiceRequest)
@@ -34,7 +35,6 @@ import Proto.Opentelemetry.Proto.Resource.V1.Resource (Resource)
 import Proto.Opentelemetry.Proto.Resource.V1.Resource_Fields qualified as LR
 import Proto.Opentelemetry.Proto.Trace.V1.Trace (ResourceSpans, ScopeSpans, Span)
 import Proto.Opentelemetry.Proto.Trace.V1.Trace_Fields qualified as TL
-import Data.ByteString (ByteString)
 
 data OtelClientParameters = OtelClientParameters
   { logEnpoint :: String

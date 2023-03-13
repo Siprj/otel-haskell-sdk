@@ -7,6 +7,7 @@ module Lib (
 
 import Control.Concurrent (threadDelay)
 import Control.Monad
+import Control.Monad.Catch (Exception, MonadThrow (throwM), SomeException, try)
 import Data.ProtoLens.Labels ()
 import Data.Text qualified as T
 import Effectful
@@ -14,10 +15,9 @@ import GHC.Generics
 import GHC.Natural (Natural)
 import Options.Applicative
 import Otel.Client
-import Otel.Effect (logInfo_, logWarn_, runOtel, traceServer_, withInstrumentationScope, traceInternal_)
+import Otel.Effect (logInfo_, logWarn_, runOtel, traceInternal_, traceServer_, withInstrumentationScope)
 import Otel.Type
 import Prelude hiding (log)
-import Control.Monad.Catch (try, MonadThrow (throwM), Exception, SomeException)
 
 data Arguments = Arguments
   { insertDelay :: Int
@@ -56,6 +56,7 @@ myAppScope = Scope
 
 data TestException = TestException
   deriving stock (Show)
+
 instance Exception TestException
 
 greet :: IO ()

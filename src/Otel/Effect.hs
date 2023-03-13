@@ -65,7 +65,6 @@ data Otel :: Effect where
   TraceEventCall :: TraceEvent -> Otel m ()
   SpanLinCall :: Otel m (Maybe SpanLink)
 
-
 -- | Run the dynamic effect and create the root trace if the trace data are
 -- provided. If the trace data is not provided any subsequent trace call will
 -- be ignored.
@@ -117,7 +116,6 @@ log logData = send $ LogCall logData
 -- | The most general tracing function.
 traceSpan :: (HasCallStack, Otel :> es) => TraceData -> Eff es a -> Eff es a
 traceSpan traceData m = send $ TraceSpanCall traceData m
-
 
 -- | Otel traces allow to add significant events into the trace trace
 -- directly. The difference with logs is that logs are only linked to traces,

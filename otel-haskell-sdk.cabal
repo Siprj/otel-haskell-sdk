@@ -90,8 +90,8 @@ library
     , bytestring
     , containers
     , deepseq
-    , exceptions
     , effectful-core
+    , exceptions
     , http-client
     , http-types
     , microlens

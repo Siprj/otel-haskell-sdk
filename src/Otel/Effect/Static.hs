@@ -12,7 +12,7 @@ module Otel.Effect.Static (
 
 import Control.Concurrent.STM
 import Control.Monad (when)
-import Control.Monad.Catch (mask, catch, throwM, SomeException)
+import Control.Monad.Catch (SomeException, catch, mask, throwM)
 import Data.Maybe (Maybe (Just, Nothing), isJust)
 import Data.ProtoLens (defMessage)
 import Data.Semigroup ((<>))
@@ -28,13 +28,12 @@ import GHC.TypeLits (KnownSymbol)
 import Lens.Micro ((&), (.~), (?~))
 import Otel.Internal.Client (OtelClient (..))
 import Otel.Internal.OtelQueue
-import Otel.Internal.Type (Attributes, LogData (..), Scope, SpanId, SpanStatus (..), TraceData (..), TraceEvent (..), TraceId, Scope (..), fromSpanId, fromTraceId, getRandomSpanId, getRandomTraceId, logLevelToSeverityNumber, logLevelToSeverityText, toOtelAttributes, toOtelSpanKind, toOtelSpanLinks, toOtelSpanStatus, toScopeData, ScopeData, SpanLink (..))
+import Otel.Internal.Type (Attributes, LogData (..), Scope (..), ScopeData, SpanId, SpanLink (..), SpanStatus (..), TraceData (..), TraceEvent (..), TraceId, fromSpanId, fromTraceId, getRandomSpanId, getRandomTraceId, logLevelToSeverityNumber, logLevelToSeverityText, toOtelAttributes, toOtelSpanKind, toOtelSpanLinks, toOtelSpanStatus, toScopeData)
 import Proto.Opentelemetry.Proto.Common.V1.Common (AnyValue)
 import Proto.Opentelemetry.Proto.Logs.V1.Logs (LogRecord)
 import Proto.Opentelemetry.Proto.Metrics.V1.Metrics (Metric)
 import Proto.Opentelemetry.Proto.Trace.V1.Trace (Span, Span'Event)
 import Prelude (floor, id, maybe, mempty, pure, undefined, ($), (*), (.))
-
 
 -- | Logging/Tracing/Metrics effect. This effect is static one. It is better to
 -- use the dynamic one in the `Otel.Effect` module.
@@ -155,7 +154,11 @@ log LogData {..} = do
       defMessage
         & #maybe'stringValue ?~ message
 
-runWithTrace :: forall es a. (Otel :> es) => TraceData -> Eff es a ->
+runWithTrace ::
+  forall es a.
+  (Otel :> es) =>
+  TraceData ->
+  Eff es a ->
   OtelSingleQueue Span ->
   Attributes ->
   Maybe SpanId ->
@@ -179,7 +182,8 @@ runWithTrace traceData m traceQueue globalAttributes mOldSpanId traceId newSpanI
     handleError startTime e = do
       endTime <- unsafeEff_ getCurrentTime
       unsafeEff_ . atomically . insertIntoSingeQueue traceQueue $
-        mkSpan traceData globalAttributes startTime endTime mOldSpanId traceId newSpanId mempty $ SpanError "Exceptions was raised during this span."
+        mkSpan traceData globalAttributes startTime endTime mOldSpanId traceId newSpanId mempty $
+          SpanError "Exceptions was raised during this span."
       throwM e
 
 rootTrace :: forall es a. (Otel :> es) => TraceData -> Eff es a -> Eff es a
@@ -188,7 +192,6 @@ rootTrace traceData m = do
   newSpanId <- unsafeEff_ getRandomSpanId
   traceId <- unsafeEff_ getRandomTraceId
   runWithTrace traceData m instrumentedTraceQueue globalAttributes Nothing traceId newSpanId
-
 
 -- | Create a new span.
 traceSpan :: forall es a. (Otel :> es) => TraceData -> Eff es a -> Eff es a
@@ -271,11 +274,13 @@ traceEvent TraceEvent {..} = do
 -- triggered the cron job.
 spanLink :: (Otel :> es) => Eff es (Maybe SpanLink)
 spanLink = do
-  OtelState{..} <- getStaticRep
+  OtelState {..} <- getStaticRep
   pure $ case mTraceAndSpanIds of
     Nothing -> Nothing
-    Just (traceId, spanId) -> Just $ SpanLink
-      { traceId = traceId
-      , spanId = spanId
-      , attributes = mempty
-      }
+    Just (traceId, spanId) ->
+      Just $
+        SpanLink
+          { traceId = traceId
+          , spanId = spanId
+          , attributes = mempty
+          }

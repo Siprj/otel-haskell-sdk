@@ -12,9 +12,7 @@ module Otel.Type (
   SpanLinks,
   SpanKind (..),
   TraceEvent (..),
-  Scope(..)
-  )
-where
+  Scope (..),
+) where
 
 import Otel.Internal.Type
-
