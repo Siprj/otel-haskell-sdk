@@ -1,8 +1,8 @@
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Main (
   main,
@@ -53,4 +53,3 @@ resourceAttributes =
   , KeyValue "machine.id" $ StringV "123"
   , KeyValue "container_name" $ StringV "example-container"
   ]
-
