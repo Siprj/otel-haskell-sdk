@@ -4,6 +4,12 @@ datasources:
   - name: Loki
     type: loki
     url: http://loki:3100
+    jsonData:
+      derivedFields:
+        - datasourceUid: tempo
+          matcherRegex: "\\\"traceid\\\":\\\"([^\"]*)\\\""
+          name: "traceID"
+          url: "$${__value.raw}"
   - name: Prometheus
     uid: prometheus
     type: prometheus

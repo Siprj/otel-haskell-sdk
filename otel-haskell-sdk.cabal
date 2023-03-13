@@ -57,7 +57,6 @@ library
   import:          common-ghc-options
   hs-source-dirs:  src generated
   exposed-modules:
-    Lib
     Otel.Client
     Otel.Effect
     Otel.Effect.Static
@@ -116,14 +115,3 @@ test-suite otel-haskell-sdk-test
     , otel-haskell-sdk
     , tasty
     , tasty-hunit
-
-executable otel-haskell-sdk
-  import:         common-stanza
-  import:         common-ghc-options
-  import:         common-ghc-executable-options
-  hs-source-dirs: app
-  main-is:        Main.hs
-  build-depends:
-    , base
-    , optparse-applicative
-    , otel-haskell-sdk

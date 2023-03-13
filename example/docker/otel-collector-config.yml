@@ -35,17 +35,8 @@ processors:
         key: machine_id
         from_attribute: machine.id
       - action: insert
-        key: spanID
-        from_attribute: spanid
-      - action: insert
         key: traceID
         from_attribute: traceid
-      - action: insert
-        key: spanID
-        from_attribute: span_id
-      - action: insert
-        key: traceID
-        from_attribute: trace_id
 
   batch:
     send_batch_size:  500

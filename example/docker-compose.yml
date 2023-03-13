@@ -46,6 +46,7 @@ services:
       - "127.0.0.1:3000:3000"
     volumes:
       - ./docker/grafana-provisioning/:/etc/grafana/provisioning
+      - ./docker/grafana.ini/:/etc/grafana/grafana.ini
     depends_on:
       - loki
       - tempo
