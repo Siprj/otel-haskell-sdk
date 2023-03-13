@@ -6,13 +6,13 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: fourmolu/fourmolu-action@v1
+      - uses: actions/checkout@v3
+      - uses: fourmolu/fourmolu-action@v6
 
   hlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: haskell/actions/hlint-setup@v2
       - uses: haskell/actions/hlint-run@v2
 
@@ -27,7 +27,7 @@ jobs:
           unzip "/tmp/convco-ubuntu.zip" -d "${HOME}/.local/bin"
           chmod +x "${HOME}/.local/bin/convco"
           echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: check the commits
