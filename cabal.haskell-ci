@@ -1,10 +1,10 @@
 -- cabal-install version for all jobs
-cabal-install-version: 3.6
+cabal-install-version: 3.10
 
 -- jobs (N:M - cabal:ghc)
 jobs:
 
--- distribution version (xenial, bionic, focal)
+-- distribution version (xenial, bionic, focal, jammy)
 distribution: bionic
 
 -- Jobs selection across packages
@@ -43,6 +43,9 @@ benchmarks: True
 -- Haddock step
 haddock: True
 
+-- Haddock components
+haddock-components: all
+
 -- Build without tests and benchmarks
 no-tests-no-benchmarks: True
 
@@ -50,7 +53,10 @@ no-tests-no-benchmarks: True
 unconstrained: True
 
 -- Use head.hackage repository. Also marks as allow-failures
-head-hackage: >=9.3
+head-hackage: >=9.7
+
+-- Use :override for head.hackage repository
+head-hackage-override: True
 
 -- Run tests with GHCJS (experimental, relies on cabal-plan finding test-suites)
 ghcjs-tests: False
@@ -118,7 +124,7 @@ ghcup-cabal: True
 ghcup-jobs: >8.10.4 && <9 || >9.0.1
 
 -- ghcup version
-ghcup-version: 0.1.18.0
+ghcup-version: 0.1.19.2
 
 -- Additional apt packages to install
 apt:
@@ -140,7 +146,7 @@ doctest: False
 doctest-options:
 
 -- Doctest version
-doctest-version: ^>=0.20.0
+doctest-version: ^>=0.21.0
 
 -- Filter packages from .ghc.environment file
 doctest-filter-packages:
@@ -172,7 +178,7 @@ hlint-yaml:
 hlint-options:
 
 -- HLint version
-hlint-version: >=3.3 && <3.4
+hlint-version: >=3.5 && <3.6
 
 -- Download HLint binary release
 hlint-download-binary: True
@@ -185,4 +191,3 @@ github-action-name:
 
 -- The maximum number of minutes to let a job run
 timeout-minutes: 60
-
