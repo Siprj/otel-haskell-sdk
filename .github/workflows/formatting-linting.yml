@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: fourmolu/fourmolu-action@v6
+      - uses: fourmolu/fourmolu-action@v7
 
   hlint:
     runs-on: ubuntu-latest
@@ -35,4 +35,3 @@ jobs:
           ls -lah
           git log
           convco check
-
