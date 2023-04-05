@@ -10,7 +10,7 @@ copyright:     Copyright: (c) 2022 Jan Šipr
 license:       MIT
 license-file:  LICENSE
 build-type:    Simple
-tested-with:   GHC ==9.2.7 || ==9.4.4
+tested-with:   GHC ==9.2.7 || ==9.4.4 || ==9.6.1
 
 executable otel-example
   hs-source-dirs: src
@@ -19,7 +19,6 @@ executable otel-example
     , base
     , effectful-core
     , exceptions
-    , optparse-applicative
     , otel-haskell-sdk
     , text
 

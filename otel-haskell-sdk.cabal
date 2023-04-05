@@ -10,7 +10,7 @@ copyright:       Copyright: (c) 2022 Jan Šipr
 license:         MIT
 license-file:    LICENSE
 build-type:      Simple
-tested-with:     GHC ==9.2.7 || ==9.4.4
+tested-with:     GHC ==9.2.7 || ==9.4.4 || ==9.6.1
 extra-doc-files:
   CHANGELOG.md
   README.md
@@ -79,20 +79,14 @@ library
     Proto.Opentelemetry.Proto.Trace.V1.Trace_Fields
 
   build-depends:
-    , aeson
-    , aeson-casing
-    , attoparsec            >=0.14.1
     , base
-    , base16-bytestring
     , bytestring
     , containers
-    , deepseq
     , effectful-core
     , exceptions
     , http-client
     , http-types
     , microlens
-    , optparse-applicative
     , proto-lens
     , proto-lens-runtime
     , random
