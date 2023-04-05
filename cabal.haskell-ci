@@ -56,7 +56,7 @@ unconstrained: True
 head-hackage: >=9.7
 
 -- Use :override for head.hackage repository
-head-hackage-override: True
+head-hackage-override: False
 
 -- Run tests with GHCJS (experimental, relies on cabal-plan finding test-suites)
 ghcjs-tests: False
