@@ -23,7 +23,7 @@ jobs:
     timeout-minutes:
       60
     container:
-      image: buildpack-deps:jammy
+      image: buildpack-deps:focal
     continue-on-error: ${{ matrix.allow-failure }}
     strategy:
       matrix:
@@ -171,9 +171,6 @@ jobs:
         run: |
           $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks --dependencies-only -j2 all
           $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH --dependencies-only -j2 all
-      - name: build w/o tests
-        run: |
-          $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks all
       - name: build
         run: |
           $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH all --write-ghc-environment-files=always
@@ -183,10 +180,6 @@ jobs:
       - name: haddock
         run: |
           $CABAL v2-haddock --disable-documentation --haddock-all $ARG_COMPILER --with-haddock $HADDOCK $ARG_TESTS $ARG_BENCH all
-      - name: unconstrained build
-        run: |
-          rm -f cabal.project.local
-          $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks all
       - name: save cache
         uses: actions/cache/save@v3
         if: always()
