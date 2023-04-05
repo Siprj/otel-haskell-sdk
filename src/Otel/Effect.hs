@@ -71,12 +71,12 @@ data Otel :: Effect where
 --
 -- This function has to finish for the root trace to be sent.
 runOtel ::
-  IOE :> es => OtelClient -> Maybe TraceData -> Eff (Otel : es) a -> Eff es a
+  (IOE :> es) => OtelClient -> Maybe TraceData -> Eff (Otel : es) a -> Eff es a
 runOtel otelClient mRootTraceData =
   reinterpret (S.runOtelStatic otelClient mRootTraceData) localOtel
 
 localOtel ::
-  S.Otel :> es =>
+  (S.Otel :> es) =>
   LocalEnv localEs es ->
   Otel (Eff localEs) a ->
   Eff es a

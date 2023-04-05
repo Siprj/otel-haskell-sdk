@@ -44,20 +44,20 @@ data OtelSingleQueue value = OtelSingleQueue
   deriving stock (Generic)
 
 -- | Create new queue with its size as parameter.
-newOtelQueueSet :: Ord key => Natural -> STM (OtelQueueSet key value)
+newOtelQueueSet :: (Ord key) => Natural -> STM (OtelQueueSet key value)
 newOtelQueueSet globalCapacity = do
   globalCounter <- newTVar 0
   globalQueues <- newTVar mempty
   pure $ OtelQueueSet {..}
 
 -- | IO variant of `newOtelQueueSet`
-newOtelQueueSetIO :: Ord key => Natural -> IO (OtelQueueSet key value)
+newOtelQueueSetIO :: (Ord key) => Natural -> IO (OtelQueueSet key value)
 newOtelQueueSetIO = atomically . newOtelQueueSet
 
 -- | Either creates new single queue or return existing one corresponding to
 -- the key.
 getSingleQueue ::
-  Ord key => key -> OtelQueueSet key value -> STM (OtelSingleQueue value)
+  (Ord key) => key -> OtelQueueSet key value -> STM (OtelSingleQueue value)
 getSingleQueue key OtelQueueSet {..} = do
   queueMap <- readTVar globalQueues
   case MS.lookup key queueMap of
