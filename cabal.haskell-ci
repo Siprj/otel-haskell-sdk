@@ -14,7 +14,7 @@ jobs-selection: uniform
 enabled: True
 
 -- Copy ? fields from cabal.project fields
-copy-fields: some
+copy-fields: all
 
 -- --ghc-options for local packages
 local-ghc-options:
