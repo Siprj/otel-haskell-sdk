@@ -1,1 +1,8 @@
 packages: . example
+
+-- Allow ghc-9.6
+source-repository-package
+  type: git
+  location: https://github.com/google/proto-lens.git
+  tag: c71789daf8bef149bf8215db5ca5e5c94bbcc9fa
+  subdir: proto-lens proto-lens-runtime
