@@ -81,6 +81,7 @@ library
   build-depends:
     , aeson
     , aeson-casing
+    , attoparsec            >=0.14.1
     , base
     , base16-bytestring
     , bytestring
