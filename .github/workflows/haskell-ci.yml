@@ -159,17 +159,11 @@ jobs:
           echo "package otel-example" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           cat >> cabal.project <<EOF
-          source-repository-package
-            type:     git
-            location: https://github.com/google/proto-lens.git
-            tag:      c71789daf8bef149bf8215db5ca5e5c94bbcc9fa
-            subdir:   proto-lens
-
-          source-repository-package
-            type:     git
-            location: https://github.com/google/proto-lens.git
-            tag:      c71789daf8bef149bf8215db5ca5e5c94bbcc9fa
-            subdir:   proto-lens-runtime
+          allow-newer: proto-lens:base
+          allow-newer: ghc-prim
+          allow-newer: primitive
+          allow-newer: transformers
+          allow-newer: proto-lens-runtime:base
           EOF
           $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(otel-example|otel-haskell-sdk)$/; }' >> cabal.project.local
           cat cabal.project

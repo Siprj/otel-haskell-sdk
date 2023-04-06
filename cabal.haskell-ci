@@ -1,5 +1,4 @@
 distribution: focal
-jobs-selection: any
 no-tests-no-benchmarks: False
 unconstrained: False
 cabal-check: False
