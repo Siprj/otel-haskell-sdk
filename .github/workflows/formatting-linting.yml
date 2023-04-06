@@ -11,8 +11,8 @@ jobs:
         with:
           # speed-up fourmolu checking ignoring auto-generated files
           pattern: |
-            :!:generated/**
-            *.hs
+            !generated/**
+            **/*.hs
 
   hlint:
     runs-on: ubuntu-latest
