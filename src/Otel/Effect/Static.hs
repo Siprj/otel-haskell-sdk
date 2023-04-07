@@ -56,7 +56,7 @@ globalTypeScope :: Scope "global" "0.0.0"
 globalTypeScope = Scope
 
 -- | Run the static effect and create the root trace if the trace data are
--- provided. If the trace data is not provided any subsequent trace call will
+-- provided. If the trace data is not provided any subsequent trace calls will
 -- be ignored.
 runOtelStatic ::
   IOE :> es => OtelClient -> Maybe TraceData -> Eff (Otel : es) a -> Eff es a

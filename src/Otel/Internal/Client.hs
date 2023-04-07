@@ -103,9 +103,7 @@ startOtelClient resourceAttributes' OtelClientParameters {..} = do
 
 runLogClientProcess :: OtelClient -> IO ()
 runLogClientProcess OtelClient {..} = forever $ do
-  putStrLn "processing log queues"
   queueSize <- queueLengthIO logQueueSet
-  putStrLn $ "queueSize: " <> show queueSize
   scopeQueues <- fmap toList . atomically $ getQueueMap logQueueSet
   data' <- mapM fetchQueue scopeQueues
   let logChunks = chunkLogs mkScopeLogs data' logQueueChunkSize
@@ -118,9 +116,7 @@ runLogClientProcess OtelClient {..} = forever $ do
 
 runTraceClientProcess :: OtelClient -> IO ()
 runTraceClientProcess OtelClient {..} = forever $ do
-  putStrLn "processing trace queues"
   queueSize <- queueLengthIO traceQueueSet
-  putStrLn $ "queueSize: " <> show queueSize
   scopeQueues <- fmap toList . atomically $ getQueueMap traceQueueSet
   data' <- mapM fetchQueue scopeQueues
   let scopeChunks = chunkLogs mkScopeSpans data' traceQueueChunkSize
