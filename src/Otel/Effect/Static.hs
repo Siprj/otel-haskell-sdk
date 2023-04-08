@@ -59,7 +59,7 @@ globalTypeScope = Scope
 -- provided. If the trace data is not provided any subsequent trace calls will
 -- be ignored.
 runOtelStatic ::
-  IOE :> es => OtelClient -> Maybe TraceData -> Eff (Otel : es) a -> Eff es a
+  (IOE :> es) => OtelClient -> Maybe TraceData -> Eff (Otel : es) a -> Eff es a
 runOtelStatic OtelClient {..} mRootTraceData m = do
   let globalScope = toScopeData globalTypeScope
   let createInstrumentedLogQueue scope = getSingleQueue scope logQueueSet

@@ -1,10 +1,7 @@
 cabal-version:   3.6
 name:            otel-haskell-sdk
 version:         0.1.0
-
--- synopsis:
--- description:
-category:
+category:        OpenTelemetry
 homepage:        https://github.com/Siprj/otel-haskell-sdk#readme
 bug-reports:     https://github.com/Siprj/otel-haskell-sdk/issues
 author:          Jan Šipr
@@ -13,7 +10,7 @@ copyright:       Copyright: (c) 2022 Jan Šipr
 license:         MIT
 license-file:    LICENSE
 build-type:      Simple
-tested-with:     GHC ==9.2.1 || ==9.2.2 || ==9.4.2
+tested-with:     GHC ==9.2.7 || ==9.4.4 || ==9.6.1
 extra-doc-files:
   CHANGELOG.md
   README.md
@@ -45,7 +42,7 @@ common common-ghc-options
     ghc-options: -Werror
 
   ghc-options:
-    -O2 -Wall -Wcompat -Wincomplete-record-updates
+    -Wall -Wcompat -Wincomplete-record-updates
     -Wincomplete-uni-patterns -Wmissing-deriving-strategies
     -Wmissing-export-lists -Wpartial-fields -Wredundant-constraints
 
@@ -82,19 +79,14 @@ library
     Proto.Opentelemetry.Proto.Trace.V1.Trace_Fields
 
   build-depends:
-    , aeson
-    , aeson-casing
     , base
-    , base16-bytestring
     , bytestring
     , containers
-    , deepseq
     , effectful-core
     , exceptions
     , http-client
     , http-types
     , microlens
-    , optparse-applicative
     , proto-lens
     , proto-lens-runtime
     , random

@@ -1,1 +1,5 @@
 packages: . example
+
+allow-newer:
+  , proto-lens:base,ghc-prim,primitive,transformers
+  , proto-lens-runtime:base

@@ -1,32 +1,27 @@
-cabal-version:   3.6
-name:            otel-example
-version:         0.1.0
-
--- synopsis:
--- description:
-category:
-homepage:        https://github.com/Siprj/otel-haskell-sdk#readme
-bug-reports:     https://github.com/Siprj/otel-haskell-sdk/issues
-author:          Jan Šipr
-maintainer:      sipr.jan@gmail.com
-copyright:       Copyright: (c) 2022 Jan Šipr
-license:         MIT
-license-file:    LICENSE
-build-type:      Simple
-tested-with:     GHC ==9.2.1 || ==9.2.2 || ==9.4.2
+cabal-version: 3.6
+name:          otel-example
+version:       0.1.0
+category:      OpenTelemetry
+homepage:      https://github.com/Siprj/otel-haskell-sdk#readme
+bug-reports:   https://github.com/Siprj/otel-haskell-sdk/issues
+author:        Jan Šipr
+maintainer:    sipr.jan@gmail.com
+copyright:     Copyright: (c) 2022 Jan Šipr
+license:       MIT
+build-type:    Simple
+tested-with:   GHC ==9.2.7 || ==9.4.4 || ==9.6.1
 
 executable otel-example
   hs-source-dirs: src
   main-is:        Main.hs
   build-depends:
     , base
-    , text
     , effectful-core
     , exceptions
-    , optparse-applicative
     , otel-haskell-sdk
+    , text
 
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-    -O2 -Wall -Wcompat -Wincomplete-record-updates
-    -Wincomplete-uni-patterns -Wmissing-export-lists
-    -Wpartial-fields -Wredundant-constraints
+  ghc-options:
+    -threaded -rtsopts -with-rtsopts=-N -Wall -Wcompat
+    -Wincomplete-record-updates -Wincomplete-uni-patterns
+    -Wmissing-export-lists -Wpartial-fields -Wredundant-constraints
