@@ -11,7 +11,7 @@ module Otel.Internal.Client (
 import Control.Concurrent
 import Control.Concurrent.STM (atomically)
 import Control.Exception (SomeException, catch)
-import Control.Monad (forever, unless, void)
+import Control.Monad (forever, unless, void, when)
 import Data.ByteString (ByteString)
 import Data.Function ((&))
 import Data.List (foldl')
@@ -73,6 +73,7 @@ data OtelClient = OtelClient
   , traceQueueSet :: OtelQueueSet ScopeData Span
   , logRequestBase :: Request
   , traceRequestBase :: Request
+  , queueSize :: Natural
   , logQueueChunkSize :: Int
   , traceQueueChunkSize :: Int
   , resourceAttributes :: Vector KeyValue
@@ -101,9 +102,13 @@ startOtelClient resourceAttributes' OtelClientParameters {..} = do
   void . forkIO $ runTraceClientProcess client
   pure client
 
+when80Percent :: Natural -> Natural -> IO () -> IO ()
+when80Percent value limit = when ((fromIntegral value) > (fromIntegral limit * (0.8 :: Double)))
+
 runLogClientProcess :: OtelClient -> IO ()
 runLogClientProcess OtelClient {..} = forever $ do
-  queueSize <- queueLengthIO logQueueSet
+  logQueueLength <- queueLengthIO logQueueSet
+  when80Percent logQueueLength queueSize $ putStrLn "WARNING: Logging queue is 80% full."
   scopeQueues <- fmap toList . atomically $ getQueueMap logQueueSet
   data' <- mapM fetchQueue scopeQueues
   let logChunks = chunkLogs mkScopeLogs data' logQueueChunkSize
@@ -116,7 +121,8 @@ runLogClientProcess OtelClient {..} = forever $ do
 
 runTraceClientProcess :: OtelClient -> IO ()
 runTraceClientProcess OtelClient {..} = forever $ do
-  queueSize <- queueLengthIO traceQueueSet
+  traceQueueLength <- queueLengthIO traceQueueSet
+  when80Percent traceQueueLength queueSize $ putStrLn "WARNING: Tracing queue is 80% full."
   scopeQueues <- fmap toList . atomically $ getQueueMap traceQueueSet
   data' <- mapM fetchQueue scopeQueues
   let scopeChunks = chunkLogs mkScopeSpans data' traceQueueChunkSize
