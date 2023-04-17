@@ -3,6 +3,7 @@
 module Otel.Effect (
   Otel (..),
   runOtel,
+  runOtelNoop,
   withInstrumentationScope,
   withAttributes,
   log,
@@ -92,6 +93,21 @@ localOtel env = \case
     localSeqUnlift env $ \unlift -> S.traceSpan traceData (unlift m)
   TraceEventCall eventData -> S.traceEvent eventData
   SpanLinCall -> S.spanLink
+
+runOtelNoop ::
+  Eff (Otel : es) a -> Eff es a
+runOtelNoop = interpret $ \env -> \case
+  WithInstrumentationScopeCall _typeScope m ->
+    localSeqUnlift env $
+      \unlift -> unlift m
+  WithAtributesCall _attributes m ->
+    localSeqUnlift env $ \unlift -> unlift m
+  MetricsCall _metrics' -> pure ()
+  LogCall _logData -> pure ()
+  TraceSpanCall _traceData m ->
+    localSeqUnlift env $ \unlift -> unlift m
+  TraceEventCall _eventData -> pure ()
+  SpanLinCall -> pure Nothing
 
 -- | Change the instrumentation scope. This function should be used by
 -- instrumented/instrumentation libraries/components to indicate the
