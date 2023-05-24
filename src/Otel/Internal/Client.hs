@@ -37,7 +37,7 @@ import Proto.Opentelemetry.Proto.Trace.V1.Trace (ResourceSpans, ScopeSpans, Span
 import Proto.Opentelemetry.Proto.Trace.V1.Trace_Fields qualified as TL
 
 data OtelClientParameters = OtelClientParameters
-  { logEnpoint :: String
+  { logEndpoint :: String
   -- ^ Full URL where the logging payload will be send including the
   -- domain name/IP.
   --
@@ -60,7 +60,7 @@ data OtelClientParameters = OtelClientParameters
 defautOtelClientParameters :: OtelClientParameters
 defautOtelClientParameters =
   OtelClientParameters
-    { logEnpoint = "http://localhost:4218/v1/logs"
+    { logEndpoint = "http://localhost:4218/v1/logs"
     , traceEndpoint = "http://localhost:4218/v1/traces"
     , queueSize = 100000
     , logQueueChunkSize = 1000
@@ -82,7 +82,7 @@ data OtelClient = OtelClient
 startOtelClient :: ResourceAttributes -> OtelClientParameters -> IO OtelClient
 startOtelClient resourceAttributes' OtelClientParameters {..} = do
   httpManager <- newManager defaultManagerSettings
-  parsedUrlLogRequest <- parseRequest logEnpoint
+  parsedUrlLogRequest <- parseRequest logEndpoint
   let logRequestBase =
         parsedUrlLogRequest
           { method = "POST"
