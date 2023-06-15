@@ -9,7 +9,7 @@ maintainer:    sipr.jan@gmail.com
 copyright:     Copyright: (c) 2022 Jan Šipr
 license:       MIT
 build-type:    Simple
-tested-with:   GHC ==9.2.7 || ==9.4.4 || ==9.6.1
+tested-with:   GHC ==9.2.8 || ==9.4.5 || ==9.6.2
 
 executable otel-example
   hs-source-dirs: src
