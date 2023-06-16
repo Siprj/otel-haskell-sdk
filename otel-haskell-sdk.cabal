@@ -52,7 +52,7 @@ common common-ghc-executable-options
 library
   import:          common-stanza
   import:          common-ghc-options
-  hs-source-dirs:  src generated
+  hs-source-dirs:  src protocol/src
   exposed-modules:
     Otel.Client
     Otel.Effect
