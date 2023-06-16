@@ -52,7 +52,7 @@ common common-ghc-executable-options
 library
   import:          common-stanza
   import:          common-ghc-options
-  hs-source-dirs:  src protocol/src
+  hs-source-dirs:  src
   exposed-modules:
     Otel.Client
     Otel.Effect
@@ -61,22 +61,6 @@ library
     Otel.Internal.OtelQueue
     Otel.Internal.Type
     Otel.Type
-    Proto.Opentelemetry.Proto.Collector.Logs.V1.LogsService
-    Proto.Opentelemetry.Proto.Collector.Logs.V1.LogsService_Fields
-    Proto.Opentelemetry.Proto.Collector.Metrics.V1.MetricsService
-    Proto.Opentelemetry.Proto.Collector.Metrics.V1.MetricsService_Fields
-    Proto.Opentelemetry.Proto.Collector.Trace.V1.TraceService
-    Proto.Opentelemetry.Proto.Collector.Trace.V1.TraceService_Fields
-    Proto.Opentelemetry.Proto.Common.V1.Common
-    Proto.Opentelemetry.Proto.Common.V1.Common_Fields
-    Proto.Opentelemetry.Proto.Logs.V1.Logs
-    Proto.Opentelemetry.Proto.Logs.V1.Logs_Fields
-    Proto.Opentelemetry.Proto.Metrics.V1.Metrics
-    Proto.Opentelemetry.Proto.Metrics.V1.Metrics_Fields
-    Proto.Opentelemetry.Proto.Resource.V1.Resource
-    Proto.Opentelemetry.Proto.Resource.V1.Resource_Fields
-    Proto.Opentelemetry.Proto.Trace.V1.Trace
-    Proto.Opentelemetry.Proto.Trace.V1.Trace_Fields
 
   build-depends:
     , base
@@ -87,8 +71,8 @@ library
     , http-client
     , http-types
     , microlens
+    , otel-protocol
     , proto-lens
-    , proto-lens-runtime
     , random
     , stm
     , text

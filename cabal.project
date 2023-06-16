@@ -1,4 +1,4 @@
-packages: . example
+packages: . example protocol
 
 allow-newer:
   , proto-lens:base,ghc-prim,primitive,transformers
