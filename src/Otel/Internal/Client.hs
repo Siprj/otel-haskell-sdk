@@ -103,7 +103,7 @@ startOtelClient resourceAttributes' OtelClientParameters {..} = do
   pure client
 
 when80Percent :: Natural -> Natural -> IO () -> IO ()
-when80Percent value limit = when ((fromIntegral value) > (fromIntegral limit * (0.8 :: Double)))
+when80Percent value limit = when (fromIntegral value > (fromIntegral limit * (0.8 :: Double)))
 
 runLogClientProcess :: OtelClient -> IO ()
 runLogClientProcess OtelClient {..} = forever $ do

@@ -52,7 +52,7 @@ common common-ghc-executable-options
 library
   import:          common-stanza
   import:          common-ghc-options
-  hs-source-dirs:  src generated
+  hs-source-dirs:  src
   exposed-modules:
     Otel.Client
     Otel.Effect
@@ -61,6 +61,29 @@ library
     Otel.Internal.OtelQueue
     Otel.Internal.Type
     Otel.Type
+
+  build-depends:
+    , base
+    , bytestring
+    , containers
+    , effectful-core
+    , exceptions
+    , http-client
+    , http-types
+    , microlens
+    , otel-haskell-sdk:otlp
+    , proto-lens
+    , random
+    , stm
+    , text
+    , time
+    , vector
+
+library otlp
+  default-language: Haskell2010
+  ghc-options:      -Wall -Wcompat -Werror
+  hs-source-dirs:   generated
+  exposed-modules:
     Proto.Opentelemetry.Proto.Collector.Logs.V1.LogsService
     Proto.Opentelemetry.Proto.Collector.Logs.V1.LogsService_Fields
     Proto.Opentelemetry.Proto.Collector.Metrics.V1.MetricsService
@@ -78,22 +101,7 @@ library
     Proto.Opentelemetry.Proto.Trace.V1.Trace
     Proto.Opentelemetry.Proto.Trace.V1.Trace_Fields
 
-  build-depends:
-    , base
-    , bytestring
-    , containers
-    , effectful-core
-    , exceptions
-    , http-client
-    , http-types
-    , microlens
-    , proto-lens
-    , proto-lens-runtime
-    , random
-    , stm
-    , text
-    , time
-    , vector
+  build-depends:    proto-lens-runtime
 
 test-suite otel-haskell-sdk-test
   import:         common-stanza
