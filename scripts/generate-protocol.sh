@@ -18,10 +18,10 @@ SOURCE_PATH="$(git rev-parse --show-toplevel)"
 
 cd "${SOURCE_PATH}/protocol/"
 
-OTLP_VERSION=$(cat OTLP_VERSION 2>/dev/null)
+OTLP_VERSION=$(awk '{print $1; exit}' OTLP_VERSION)
 
 if ! test -n "$OTLP_VERSION"; then
-  printf '%s\n' 'OTLP_VERSION file not available or version not specified'
+  printf '%s\n' 'Otel protobuf version not specified in OTLP_VERSION file'
   exit 1
 fi
 
