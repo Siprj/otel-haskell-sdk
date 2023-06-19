@@ -134,7 +134,6 @@ jobs:
           touch cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/." >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/example" >> cabal.project
-          echo "packages: $GITHUB_WORKSPACE/source/protocol" >> cabal.project
           cat cabal.project
       - name: sdist
         run: |
@@ -150,19 +149,14 @@ jobs:
           echo "PKGDIR_otel_haskell_sdk=${PKGDIR_otel_haskell_sdk}" >> "$GITHUB_ENV"
           PKGDIR_otel_example="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/otel-example-[0-9.]*')"
           echo "PKGDIR_otel_example=${PKGDIR_otel_example}" >> "$GITHUB_ENV"
-          PKGDIR_otel_protocol="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/otel-protocol-[0-9.]*')"
-          echo "PKGDIR_otel_protocol=${PKGDIR_otel_protocol}" >> "$GITHUB_ENV"
           rm -f cabal.project cabal.project.local
           touch cabal.project
           touch cabal.project.local
           echo "packages: ${PKGDIR_otel_haskell_sdk}" >> cabal.project
           echo "packages: ${PKGDIR_otel_example}" >> cabal.project
-          echo "packages: ${PKGDIR_otel_protocol}" >> cabal.project
           echo "package otel-haskell-sdk" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package otel-example" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
-          echo "package otel-protocol" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           cat >> cabal.project <<EOF
           allow-newer: proto-lens:base
@@ -171,7 +165,7 @@ jobs:
           allow-newer: transformers
           allow-newer: proto-lens-runtime:base
           EOF
-          $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(otel-example|otel-haskell-sdk|otel-protocol)$/; }' >> cabal.project.local
+          $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(otel-example|otel-haskell-sdk)$/; }' >> cabal.project.local
           cat cabal.project
           cat cabal.project.local
       - name: dump install plan
