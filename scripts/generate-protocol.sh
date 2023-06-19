@@ -3,12 +3,12 @@
 set -e
 
 if ! type -P protoc >/dev/null 2>&1; then
-  printf 'protoc is not available' 1>&2
+  printf '%s\n' 'protoc is not available' 1>&2
   exit 1
 fi
 
 if ! type -P proto-lens-protoc >/dev/null 2>&1; then
-  printf 'proto-lens-protoc is not available' 1>&2
+  printf '%s\n' 'proto-lens-protoc is not available' 1>&2
   exit 1
 fi
 
@@ -21,7 +21,7 @@ cd "${SOURCE_PATH}/protocol/"
 OTLP_VERSION=$(cat OTLP_VERSION 2>/dev/null)
 
 if ! test -n "$OTLP_VERSION"; then
-  printf 'OTLP_VERSION file not available or version not specified\n'
+  printf '%s\n' 'OTLP_VERSION file not available or version not specified'
   exit 1
 fi
 
