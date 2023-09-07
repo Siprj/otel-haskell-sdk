@@ -54,6 +54,8 @@ data OtelClientParameters = OtelClientParameters
   -- Default value: 100000
   , logQueueChunkSize :: Int
   , traceQueueChunkSize :: Int
+  , logEnabled :: Bool
+  , traceEnabled :: Bool
   }
   deriving stock (Show, Generic)
 
@@ -65,6 +67,8 @@ defautOtelClientParameters =
     , queueSize = 100000
     , logQueueChunkSize = 1000
     , traceQueueChunkSize = 100
+    , logEnabled = True
+    , traceEnabled = True
     }
 
 data OtelClient = OtelClient
@@ -82,25 +86,24 @@ data OtelClient = OtelClient
 startOtelClient :: ResourceAttributes -> OtelClientParameters -> IO OtelClient
 startOtelClient resourceAttributes' OtelClientParameters {..} = do
   httpManager <- newManager defaultManagerSettings
-  parsedUrlLogRequest <- parseRequest logEndpoint
-  let logRequestBase =
-        parsedUrlLogRequest
-          { method = "POST"
-          , requestHeaders = [("Content-Type", "application/x-protobuf")]
-          }
-  parsedUrlTraceRequest <- parseRequest traceEndpoint
-  let traceRequestBase =
-        parsedUrlTraceRequest
-          { method = "POST"
-          , requestHeaders = [("Content-Type", "application/x-protobuf")]
-          }
+  logRequestBase <- setProtobufRequest <$> parseRequest logEndpoint
+  traceRequestBase <- setProtobufRequest <$> parseRequest traceEndpoint
   let resourceAttributes = toOtelAttributes resourceAttributes'
   logQueueSet <- newOtelQueueSetIO queueSize
   traceQueueSet <- newOtelQueueSetIO queueSize
   let client = OtelClient {..}
-  void . forkIO $ runLogClientProcess client
-  void . forkIO $ runTraceClientProcess client
+  when (not logEnabled && not traceEnabled) $
+    putStrLn "WARNING: Logging and Tracing are disabled."
+  when logEnabled . void . forkIO $ runLogClientProcess client
+  when traceEnabled . void . forkIO $ runTraceClientProcess client
   pure client
+
+setProtobufRequest :: Request -> Request
+setProtobufRequest req =
+  req
+    { method = "POST"
+    , requestHeaders = [("Content-Type", "application/x-protobuf")]
+    }
 
 when80Percent :: Natural -> Natural -> IO () -> IO ()
 when80Percent value limit = when (fromIntegral value > (fromIntegral limit * (0.8 :: Double)))
