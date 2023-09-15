@@ -13,11 +13,9 @@ module Otel.Effect.Static (
 import Control.Concurrent.STM
 import Control.Monad (when)
 import Control.Monad.Catch (SomeException, catch, mask, throwM)
-import Data.Maybe (Maybe (Just, Nothing), isJust)
+import Data.Maybe (isJust)
 import Data.ProtoLens (defMessage)
-import Data.Semigroup ((<>))
-import Data.Time (UTCTime, nominalDiffTimeToSeconds)
-import Data.Time.Clock (getCurrentTime)
+import Data.Time (UTCTime, getCurrentTime, nominalDiffTimeToSeconds)
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
 import Data.Vector (Vector, cons)
 import Data.Word (Word64)
@@ -33,7 +31,7 @@ import Proto.Opentelemetry.Proto.Common.V1.Common (AnyValue)
 import Proto.Opentelemetry.Proto.Logs.V1.Logs (LogRecord)
 import Proto.Opentelemetry.Proto.Metrics.V1.Metrics (Metric)
 import Proto.Opentelemetry.Proto.Trace.V1.Trace (Span, Span'Event)
-import Prelude (floor, id, maybe, mempty, pure, undefined, ($), (*), (.))
+import Prelude hiding (log)
 
 -- | Logging/Tracing/Metrics effect. This effect is static one. It is better to
 -- use the dynamic one in the `Otel.Effect` module.
@@ -49,6 +47,8 @@ data instance StaticRep Otel = OtelState
   , globalAttributes :: Attributes
   , mTraceAndSpanIds :: Maybe (TraceId, SpanId)
   , events :: Vector Span'Event
+  , logEnabled :: Bool
+  , traceEnabled :: Bool
   }
   deriving stock (Generic)
 
@@ -66,7 +66,6 @@ runOtelStatic OtelClient {..} mRootTraceData m = do
   let createInstrumentedTraceQueue scope = getSingleQueue scope traceQueueSet
   instrumentedLogQueue <- liftIO . atomically $ getSingleQueue globalScope logQueueSet
   instrumentedTraceQueue <- liftIO . atomically $ getSingleQueue globalScope traceQueueSet
-
   let state =
         OtelState
           { globalAttributes = mempty
@@ -74,7 +73,9 @@ runOtelStatic OtelClient {..} mRootTraceData m = do
           , events = mempty
           , ..
           }
-  let rootAction = maybe id rootTrace mRootTraceData
+  let rootAction = case mRootTraceData of
+        Just traceData | traceEnabled -> rootTrace traceData
+        _otherwise -> id
   evalStaticRep state $ rootAction m
 
 -- | Change the instrumentation scope. This function should be used by
@@ -128,9 +129,10 @@ nanosSinceEpoch =
 log :: (Otel :> m) => LogData -> Eff m ()
 log LogData {..} = do
   otelState@OtelState {..} <- getStaticRep
-  time <- unsafeEff_ getCurrentTime
-  unsafeEff_ . atomically . insertIntoSingeQueue instrumentedLogQueue $
-    mkLogRecord otelState time
+  when logEnabled $ do
+    time <- unsafeEff_ getCurrentTime
+    unsafeEff_ . atomically . insertIntoSingeQueue instrumentedLogQueue $
+      mkLogRecord otelState time
   where
     mkLogRecord :: StaticRep Otel -> UTCTime -> LogRecord
     mkLogRecord OtelState {..} time =
@@ -202,6 +204,8 @@ traceSpan traceData m = do
     -- So the action is executed without changing the tracing scope and without
     -- doing tracing request.
     Nothing -> m
+    -- Skip tracing when disabled.
+    Just _ | not traceEnabled -> m
     Just (traceId, oldSpanId) -> do
       newSpanId <- unsafeEff_ getRandomSpanId
       runWithTrace traceData m instrumentedTraceQueue globalAttributes (Just oldSpanId) traceId newSpanId

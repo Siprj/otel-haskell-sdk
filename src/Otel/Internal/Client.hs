@@ -81,6 +81,8 @@ data OtelClient = OtelClient
   , logQueueChunkSize :: Int
   , traceQueueChunkSize :: Int
   , resourceAttributes :: Vector KeyValue
+  , logEnabled :: Bool
+  , traceEnabled :: Bool
   }
 
 startOtelClient :: ResourceAttributes -> OtelClientParameters -> IO OtelClient
@@ -93,7 +95,7 @@ startOtelClient resourceAttributes' OtelClientParameters {..} = do
   traceQueueSet <- newOtelQueueSetIO queueSize
   let client = OtelClient {..}
   when (not logEnabled && not traceEnabled) $
-    putStrLn "WARNING: Logging and Tracing are disabled."
+    putStrLn "WARNING: Both Logging and Tracing are disabled."
   when logEnabled . void . forkIO $ runLogClientProcess client
   when traceEnabled . void . forkIO $ runTraceClientProcess client
   pure client
